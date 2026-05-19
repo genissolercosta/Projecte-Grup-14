@@ -1,13 +1,19 @@
 from airport import *
 
-airports = LoadAirports("Airports.txt")
+airport=Airport ("LEBL", 41.297445, 2.0832941)
+SetSchengen(airport)
+PrintAirport (airport)
 
-for airport in airports:
-    SetSchengen(airport)
+airports=LoadAirports("Airports.txt")
+
+i=0
+while i<len(airports):
+    SetSchengen(airports[i])
+    i+=1
 
 SaveSchengenAirports(airports, 'SchengenAirports.txt')
 
-airport_existe = Airport ("LEBL", 41.297445, 2.0832941)
+airport_existe=Airport ("LEBL", 41.297445, 2.0832941)
 
 print(len(airports))
 AddAirport(airports,airport_existe)
