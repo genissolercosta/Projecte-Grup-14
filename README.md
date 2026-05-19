@@ -11,3 +11,4 @@ https://drive.google.com/file/d/1B462NJMOfLod6Uv7oAHbd8cSKmOqWQkz/view?usp=shari
 
 A l'apartat de TAGS trobareu la Versió  del projecte que us podeu descarregar en format zip.
 A continuació es mostra el vídeo de la 3ra versió:
+https://drive.google.com/file/d/1sEiQMXESO8o1hYG5mLXORlCyI7W-a5Ct/view?usp=sharing 
