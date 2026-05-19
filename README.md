@@ -7,3 +7,7 @@ Moltes gràcies.
 
 A l'apartat de TAGS trobareu la Versió 2 del projecte que us podeu descarregar en format zip.
 A continuació es mostra el vídeo de la 2na versió.
+https://drive.google.com/file/d/1B462NJMOfLod6Uv7oAHbd8cSKmOqWQkz/view?usp=sharing 
+
+A l'apartat de TAGS trobareu la Versió  del projecte que us podeu descarregar en format zip.
+A continuació es mostra el vídeo de la 3ra versió:
