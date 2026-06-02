@@ -1,5 +1,25 @@
-import matplotlib.pyplot as plt     #Permet dibuixar gràfics (per poder fer el gràfic de barres que necessitem.
-import os   #Permet interactuar amb els nostres respectius ordinadors, de manera virutal (internament).
+import matplotlib.pyplot as plt#Permet dibuixar gràfics (per poder fer el gràfic de barres que necessitem.    #Permet generar arxius en el format que utilitza Google Earth, per tal de poder-los anar ficant al mapa.
+import os#Permet interactuar amb els nostres respectius ordinadors, de manera virutal (internament).
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+#FUNCIÓ EXTRA
+PLOT_FRAME=None
+def SetPlotFrame(frame):
+    global PLOT_FRAME
+    PLOT_FRAME = frame
+
+def mostrar_plot_en_frame(fig):
+    global PLOT_FRAME
+    if PLOT_FRAME is None:
+        return
+
+    # esborrar plot anterior
+    for widget in PLOT_FRAME.winfo_children():
+        widget.destroy()
+    # inserir nou plot
+    canvas = FigureCanvasTkAgg(fig, master=PLOT_FRAME)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill="both", expand=True)
 
 xml_init = '''\
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
@@ -28,19 +48,15 @@ xml_init = '''\
         </Style>
 '''
 
-
-class Airport:  #Aquesta classe, serveix perquè, cada vegada que llegim el fitxer, crearà un aerport per cada línia,
-    # amb la seva respectiva informació.
+class Airport:#Aquesta classe, serveix perquè, cada vegada que llegim el fitxer, crearà un aerport per cada línia, amb la seva respectiva informació.
     def __init__(self, ICAO, latitud, longitud):
         self.ICAO=ICAO
         self.latitud=float(latitud)
         self.longitud=float(longitud)
         self.Schengen=False
 
-def IsSchengenAirport(ICAO):  #Rep un codi ICAO, i busca si les 2 primeres lletres d'aquest codi formen part de
-    # la Schengenlist.
-    Schengenlist = ['LO', 'EB', 'LK', 'LC', 'EK', 'EE', 'EF', 'LF', 'ED', 'LG', 'EH', 'LH', 'BI', 'LI', 'EV', 'EY',
-                    'EL', 'LM','EN', 'EP', 'LP', 'LZ', 'LJ', 'LE', 'ES', 'LS']
+def IsSchengenAirport(ICAO):#Rep un codi ICAO, i busca si les 2 primeres lletres d'aquest codi formen part de la Schengenlist.
+    Schengenlist=['LO', 'EB', 'LK', 'LC', 'EK', 'EE', 'EF', 'LF', 'ED', 'LG', 'EH', 'LH', 'BI', 'LI', 'EV', 'EY', 'EL', 'LM','EN', 'EP', 'LP', 'LZ', 'LJ', 'LE', 'ES', 'LS']
     prefix=ICAO[:2]
     i=0
     encontrado=False
@@ -51,16 +67,16 @@ def IsSchengenAirport(ICAO):  #Rep un codi ICAO, i busca si les 2 primeres lletr
             i=i+1
     return encontrado
 
-def SetSchengen(airport):   #Actualitza el boleà Schengen d'un aeroport en concret.
+def SetSchengen(airport):#Actualitza el boleà Schengen d'un aeroport en concret.
     airport.Schengen=IsSchengenAirport(airport.ICAO)
 
-def PrintAirport(airport):  #Mostra per pantalla totes les dades de l'aeroport en qüestió.
+def PrintAirport(airport):#Mostra per pantalla totes les dades de l'aeroport en qüestió.
     print("Dades de l'aeroport:")
     print("ICAO:", airport.ICAO)
     print("Coordenades:", (airport.latitud,airport.longitud))
     print("Schengen:", airport.Schengen)
 
-def latitud_decimal(coord_str):     #Conversió de les coordenades (latitud), a decimal.
+def latitud_decimal(coord_str):#Conversió de les coordenades (latitud), a decimal.
     hemisferi=coord_str[0]
     graus=float(coord_str[1:3])
     minuts=float(coord_str[3:5])
@@ -71,7 +87,7 @@ def latitud_decimal(coord_str):     #Conversió de les coordenades (latitud), a 
         decimal=-decimal
     return decimal
 
-def longitud_decimal(coord_str):    #Conversió de les coordenades (longitud), a decimal.
+def longitud_decimal(coord_str):#Conversió de les coordenades (longitud), a decimal.
     hemisferi=coord_str[0]
     graus=float(coord_str[1:4])
     minuts=float(coord_str[4:6])
@@ -82,7 +98,7 @@ def longitud_decimal(coord_str):    #Conversió de les coordenades (longitud), a
         decimal=-decimal
     return decimal
 
-def latitud_string(decimal):    #Conversió de les coordenades (latitud), des de decimal cap a format original (text).
+def latitud_string(decimal):#Conversió de les coordenades (latitud), des de decimal cap a format original (text).
     if decimal>=0:
         hemisferi="N"
     else:
@@ -94,9 +110,9 @@ def latitud_string(decimal):    #Conversió de les coordenades (latitud), des de
     minuts=int(resta)
     segons=int(round((resta-minuts)*60))
 
-    return hemisferi+str(graus).zfill(2)+str(minuts).zfill(2)+str(segons).zfill(2)
+    return hemisferi + str(graus).zfill(2) + str(minuts).zfill(2) + str(segons).zfill(2)
 
-def longitud_string(decimal):   #Conversió de les coordenades (longitud), des de decimal cap a format original (text).
+def longitud_string(decimal):#Conversió de les coordenades (longitud), des de decimal cap a format original (text).
     if decimal>=0:
         hemisferi="E"
     else:
@@ -104,42 +120,61 @@ def longitud_string(decimal):   #Conversió de les coordenades (longitud), des d
 
     decimal=abs(decimal)
     graus=int(decimal)
-    resta=(decimal-graus) * 60
+    resta=(decimal-graus)*60
     minuts=int(resta)
-    segons=int(round((resta-minuts) * 60))
+    segons=int(round((resta-minuts)*60))
 
-    return hemisferi+str(graus).zfill(3)+str(minuts).zfill(2)+str(segons).zfill(2)
+    return hemisferi + str(graus).zfill(3) + str(minuts).zfill(2) + str(segons).zfill(2)
 
 def LoadAirports(filename):#Obre el fitxer amb tots els aeroports, llegeix cada línia, i va separant les dades.
     airports=[]
+    errors=[]
+    linia_num=1
     try:
-        F=open(filename,"r")
+        F=open(filename, "r")
         linea=F.readline()
+        linia_num+=1
         linea=F.readline()
 
-        while linea!="":
-            elements=linea.split() #Elements és el nom que li fiquem a cadascuna de les columnes del fitxer de text.
-            if len(elements)==3:
-                codi=elements[0]
-                lat=latitud_decimal(elements[1])
-                lon=longitud_decimal(elements[2])
+        while linea != "":
+            elements=linea.split()#Elements és el nom que li fiquem a cadascuna de les columnes del fitxer de text.
+            if len(elements) != 3: #Comprovar nombre de columnes
+                errors+=1
+                linea = F.readline()
+                linia_num += 1
+                continue
 
-                nou_aeroport=Airport(codi, lat, lon)
-                airports.append(nou_aeroport)
+            codi=elements[0]
+            lat_str=elements[1]
+            lon_str=elements[2]
+            if len(codi) != 4: #Comprovar ICAO correcte
+                errors+=1
+                linea=F.readline()
+                linia_num+=1
+                continue
+            try:
+                lat = latitud_decimal(lat_str)
+                lon = longitud_decimal(lon_str)
+            except:
+                errors += 1
+                linea = F.readline()
+                linia_num += 1
+                continue
+
+            nou_aeroport=Airport(codi, lat, lon)
+            airports.append(nou_aeroport)
             linea=F.readline()
+            linia_num+=1
         F.close()
-        return airports
-
-    except FileNotFoundError:#Si el fitxer no existeix, es retorna una llista buida per evitar que el programa
-        # es bloquegi.
+        return airports, errors
+    except FileNotFoundError:#Si el fitxer no existeix, es retorna una llista buida per evitar que el programa es bloquegi.
         return []
 
-def SaveSchengenAirports(airports, filename):#Obre un fitxer nou em mode "write", repassa la llista d'aeroports, i,
-    # en el cas que siguin de l'espai Schengen, converteix les seves coordenades decimals a text de nou.
-    if len(airports)==0:
+def SaveSchengenAirports(airports, filename):#Obre un fitxer nou em mode "write", repassa la llista d'aeroports, i, en el cas que siguin de l'espai Schengen, converteix les seves coordenades decimals a text de nou.
+    if len(airports) == 0:
         return -1
 
-    R=open(filename,"w")
+    R=open(filename, "w")
     R.write("CODE LAT LON\n")
     i=0
     while i<len(airports):
@@ -147,25 +182,26 @@ def SaveSchengenAirports(airports, filename):#Obre un fitxer nou em mode "write"
         if aeroport.Schengen==True:
             lat_str=latitud_string(aeroport.latitud)
             lon_str=longitud_string(aeroport.longitud)
-            R.write(aeroport.ICAO+" "+lat_str+" " +lon_str+"\n")
+            R.write(aeroport.ICAO + " " + lat_str + " " + lon_str + "\n")
+        i=i+1
+
     R.close()
     return 0
 
-def AddAirport(airports,airport):#Busca si l'aeroport ja pertany a la llista i, en cas negatiu, l'afageix a
-    # la llista.
-    encontrado=False
-    i=0
-    while i<len(airports) and not encontrado:
-        if airports[i].ICAO==airport.ICAO:
-            encontrado=True
-        else:
-            i=i+1
+def AddAirport(airports, airport):
+    airport.ICAO=airport.ICAO.upper()
+    if len(airport.ICAO) != 4 or not airport.ICAO.isalpha(): #Error format ICAO
+        return -1
 
-    if not encontrado:
-        airports.append(airport)
+    i = 0 #Buscar duplicats
+    while i < len(airports):
+        if airports[i].ICAO == airport.ICAO:
+            return -2
+        i += 1
+    airports.append(airport)
+    return 0
 
-def RemoveAirport(airports,code):    #Busca l'aeroport a la llista. En cas que el trobi, l'esborra, amb la funció
-    # "delete".
+def RemoveAirport(airports,code):#Busca l'aeroport a la llista. En cas que el trobi, l'esborra, amb la funció "delete".
     i=0
     encontrado=False
     while i<len(airports) and not encontrado:
@@ -173,58 +209,57 @@ def RemoveAirport(airports,code):    #Busca l'aeroport a la llista. En cas que e
             encontrado=True
         else:
             i+=1
-
     if encontrado:
         """
         for j in range(i,len(airports)-1):
             airports[j]=airports[j+1]
         airports=airports[:-1]
         """
-        del airports[i] #Per evitar-nos una variable local i haver de redefinir tot el codi, utilitzem delete,
-        # tot i que també ho podríem fer com està comentat a dalt
+        del airports[i]#Per evitar-nos una variable local i haver de redefinir tot el codi, utilitzem delete, tot i que també ho podríem fer com està comentat a dalt
         return 0
     return -1
 
-def PlotAirports(airports):     #Fa un recompte de quants aeroports formen part de l'espai Schengen i quants no.
-    # Després del bucle "for", s'utilitzen una sèrie de funcions per generar un gràfic de barres.
+def PlotAirports(airports):#Fa un recompte de quants aeroports formen part de l'espai Schengen i quants no. Després del bucle "for", s'utilitzen una sèrie de funcions per generar un gràfic de barres.
     schengen=0
     noschengen=0
 
-    i=0
-    while i<len(airports):
-        if airports[i].Schengen:
-            schengen+=1
+    for i in range(len(airports)):
+        airport=airports[i]
+        if airport.Schengen:
+            schengen=schengen+1
         else:
-            noschengen+=1
-        i+=1
+            noschengen=noschengen+1
 
-    plt.bar(["Schengen","No Schengen"], [schengen,noschengen], color=["blue","red"])
-    plt.title("Schengen Airports")
-    plt.ylabel("Count")
-    plt.xlabel("Airports")
+    fig, ax = plt.subplots(figsize=(6, 3))
+    fig.tight_layout()
+    ax.bar(["Schengen", "No Schengen"], [schengen, noschengen], color=["blue", "red"])
+    ax.set_title("Schengen Airports")
+    ax.set_ylabel("Count")
+    ax.set_xlabel("Airports")
+    fig.tight_layout()
+    mostrar_plot_en_frame(fig)
     plt.show()
+    return fig
 
 def MapAirports(airports):
-    f_out=open("Airports.kml","w")
+    f_out = open("Airports.kml", "w")
     f_out.write(xml_init)
 
-    i=0
-    contador=1
-    while i<len(airports):
-        airport = airports[i]
-        f_out.write('        <Placemark id="' + str(contador) + '">\n')
+    i=1
+    for i in range (len(airports)):
+        airport=airports[i]
+        f_out.write('        <Placemark id="' + str(i) + '">\n')
         f_out.write('            <name>' + airport.ICAO + '</name>\n')
         if airport.Schengen:
             f_out.write('            <styleUrl>#1</styleUrl>\n')
         else:
             f_out.write('            <styleUrl>#2</styleUrl>\n')
-        f_out.write('            <Point id="' + str(contador) + '">\n')
+        f_out.write('            <Point id="' + str(i) + '">\n')
         f_out.write('                <coordinates>' + str(airport.longitud) +',' + str(airport.latitud) + ',0.0</coordinates>\n')
         f_out.write('            </Point>\n')
         f_out.write('        </Placemark>\n')
-        i=i+1
-        contador=contador+1
+        i+=1
     f_out.write('    </Document>\n')
     f_out.write('</kml>')
     f_out.close()
-    os.startfile('Airports.kml')#Executa Google Earth a l'ordinador.
+    os.startfile('Airports.kml')#Executa Google Earth
